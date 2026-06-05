@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenWave 서비스 현황 — 2026.06.05</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1A1917;
+    --text2: #6B6861;
+    --text3: #9D9A94;
+    --mint: #00C49A;
+    --mint-light: #E6FAF5;
+    --mint-dark: #008F6F;
+    --red: #E8472A;
+    --red-light: #FDF0ED;
+    --blue: #2563EB;
+    --blue-light: #EFF4FF;
+    --amber: #D97706;
+    --amber-light: #FFFBEB;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 헤더 */
+  .header {
+    background: var(--text);
+    color: #fff;
+    padding: 36px 48px 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .header-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--mint);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: #fff;
+  }
+  .header-meta {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.8;
+  }
+  .header-meta strong {
+    display: block;
+    color: rgba(255,255,255,0.8);
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  /* 레이아웃 */
+  .main { padding: 36px 48px 60px; max-width: 1200px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin: 36px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* KPI 카드 */
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--border2));
+  }
+  .kpi.green { --accent: var(--mint); }
+  .kpi.red { --accent: var(--red); }
+  .kpi.blue { --accent: var(--blue); }
+  .kpi.amber { --accent: var(--amber); }
+  .kpi-label { font-size: 11px; color: var(--text3); margin-bottom: 8px; font-weight: 500; }
+  .kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .kpi-value.green { color: var(--mint-dark); }
+  .kpi-value.red { color: var(--red); }
+  .kpi-value.blue { color: var(--blue); }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+  .badge.green { background: var(--mint-light); color: var(--mint-dark); }
+  .badge.red { background: var(--red-light); color: var(--red); }
+  .badge.blue { background: var(--blue-light); color: var(--blue); }
+  .badge.amber { background: var(--amber-light); color: var(--amber); }
+
+  /* 2컬럼 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* 카드 */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  /* 퍼널 */
+  .funnel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .funnel-label { font-size: 12px; color: var(--text2); min-width: 68px; }
+  .funnel-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; overflow: hidden; }
+  .funnel-bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 36px;
+  }
+  .funnel-val { font-size: 11px; color: var(--text2); min-width: 80px; text-align: right; font-family: 'DM Mono', monospace; }
+
+  /* 플랜 목록 */
+  .plan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .plan-row:last-child { border-bottom: none; }
+  .plan-pill {
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 99px;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+  .plan-count { font-size: 14px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+
+  /* 탭 */
+  .tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab-btn {
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all .15s;
+  }
+  .tab-btn:hover { background: var(--surface2); }
+  .tab-btn.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+  /* 차트 래퍼 */
+  .chart-box { position: relative; width: 100%; }
+  .h220 { height: 220px; }
+  .h200 { height: 200px; }
+  .h180 { height: 180px; }
+  .h160 { height: 160px; }
+
+  /* 구독자 테이블 */
+  .sub-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sub-table th {
+    text-align: left;
+    padding: 8px 10px;
+    color: var(--text3);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border2);
+    font-size: 11px;
+    letter-spacing: .03em;
+  }
+  .sub-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .sub-table tr:last-child td { border-bottom: none; }
+  .sub-table tr:hover td { background: var(--surface2); }
+  .mono { font-family: 'DM Mono', monospace; }
+
+  /* 범례 */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .ldot { width: 9px; height: 9px; border-radius: 2px; }
+
+  /* 주석 */
+  .note { font-size: 11px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
+
+  /* 푸터 */
+  .footer {
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+    padding: 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .footer strong { color: var(--text2); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-logo">genwave.ai.kr — Service Dashboard</div>
+    <h1>서비스 운영 현황</h1>
+  </div>
+  <div class="header-meta">
+    <strong>2026년 6월 5일 기준</strong>
+    데이터 출처: 회원DB · PG(Stripe) · MRR Summary<br>
+    작성: AI영상서비스사업팀 / 심민지 PO
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ① KPI -->
+  <div class="section-label">① 핵심 지표 요약</div>
+  <div class="kpi-grid">
+    <div class="kpi green">
+      <div class="kpi-label">현재 MRR (PG 기준)</div>
+      <div class="kpi-value green">$337.85</div>
+      <div class="kpi-sub">≈ 491,000원 / 월</div>
+      <span class="badge green">5월 대비 반등</span>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">누적 가입자</div>
+      <div class="kpi-value blue">679명</div>
+      <div class="kpi-sub">26년 1월~6월 5일</div>
+      <span class="badge blue">일 평균 5.4명</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">활성 구독자 (PG)</div>
+      <div class="kpi-value">17명</div>
+      <div class="kpi-sub">전원 active 상태</div>
+      <span class="badge amber">전환율 2.5%</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">누적 MRR 합계 (출시~현재)</div>
+      <div class="kpi-value">$4,080</div>
+      <div class="kpi-sub">25.5월 ~ 26.6월</div>
+      <span class="badge green">MRR Summary 기준</span>
+    </div>
+  </div>
+
+  <!-- ② 가입 퍼널 -->
+  <div class="section-label">② 가입 → 유료 전환 퍼널</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">전환 퍼널</div>
+      <div class="funnel-row">
+        <span class="funnel-label">누적 가입</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:100%;background:#2563EB">679명</div></div>
+        <span class="funnel-val">679 (100%)</span>
+      </div>
+      <div class="funnel-row">
+        <span class="funnel-label">무료 회원</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:97.5%;background:#93B4F5">662명</div></div>
+        <span class="funnel-val">662 (97.5%)</span>
+      </div>
+      <div class="funnel-row">
+        <span class="funnel-label">유료 전환</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:2.5%;background:#00C49A;min-width:40px">17명</div></div>
+        <span class="funnel-val" style="color:var(--mint-dark);font-weight:700">17 (2.5%)</span>
+      </div>
+      <p class="note">* PG subscriptions 기준 17명 (전원 active)<br>* 1,000명 유료 목표까지 983명 전환 필요</p>
+    </div>
+    <div class="card">
+      <div class="card-title">플랜별 구독자 (17명)</div>
+      <div class="plan-row">
+        <span class="plan-pill" style="background:#EFF4FF;color:#2563EB">$9 / month</span>
+        <span class="plan-count">7명</span>
+      </div>
+      <div class="plan-row">
+        <span class="plan-pill" style="background:#E6FAF5;color:#008F6F">$22 / month</span>
+        <span class="plan-count">4명</span>
+      </div>
+      <div class="plan-row">
+        <span class="plan-pill" style="background:#FDF0ED;color:#E8472A">$55.20 / month</span>
+        <span class="plan-count">3명</span>
+      </div>
+      <div class="plan-row">
+        <span class="plan-pill" style="background:#FFFBEB;color:#D97706">$22.50 / month</span>
+        <span class="plan-count">1명</span>
+      </div>
+      <div class="plan-row">
+        <span class="plan-pill" style="background:#EEEDFE;color:#534AB7">연간 구독</span>
+        <span class="plan-count">5명</span>
+      </div>
+      <div class="plan-row" style="border:none;padding-top:12px;margin-top:2px">
+        <span style="font-size:11px;color:var(--text3)">월 환산 MRR 합계</span>
+        <span class="plan-count" style="color:var(--mint-dark)">$337.85</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 일별 가입 추이 -->
+  <div class="section-label">③ 일별 신규 가입 추이 (2026.01 ~ 06)</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="tabs" id="monthTabs">
+        <button class="tab-btn on" onclick="setMonth('all',this)">전체</button>
+        <button class="tab-btn" onclick="setMonth('01',this)">1월</button>
+        <button class="tab-btn" onclick="setMonth('02',this)">2월</button>
+        <button class="tab-btn" onclick="setMonth('03',this)">3월</button>
+        <button class="tab-btn" onclick="setMonth('04',this)">4월</button>
+        <button class="tab-btn" onclick="setMonth('05',this)">5월</button>
+        <button class="tab-btn" onclick="setMonth('06',this)">6월</button>
+      </div>
+      <div class="legend">
+        <span><span class="ldot" style="background:#93B4F5"></span>신규 가입</span>
+        <span><span class="ldot" style="background:#00C49A;border-radius:50%"></span>유료 전환 발생일</span>
+      </div>
+    </div>
+    <div class="chart-box h220"><canvas id="dailyChart"></canvas></div>
+    <p class="note" id="dailyNote">전체 126일 표시 · 초록 막대 = 유료 전환 발생일 · 5/14 KOBA 효과 139명 최대</p>
+  </div>
+
+  <!-- ④ MRR 추이 -->
+  <div class="section-label">④ MRR 전체 추이 (2025.05 ~ 2026.06)</div>
+  <div class="card">
+    <div class="legend">
+      <span><span class="ldot" style="background:#2563EB"></span>Monthly MRR</span>
+      <span><span class="ldot" style="background:#00C49A;border-radius:50%"></span>현재 (6/5)</span>
+    </div>
+    <div class="chart-box h220"><canvas id="mrrChart"></canvas></div>
+    <p class="note">출시(25.5) 직후 연간 구독 유입으로 25.6월 $726 피크 → 하반기 침체 → 26.4월 $413 회복 → 5월 대형 이탈로 $305 → 현재 $338 반등 중</p>
+  </div>
+
+  <!-- ⑤ 구독자 현황 -->
+  <div class="section-label">⑤ 현재 활성 구독자 17명</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="sub-table">
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>이메일</th>
+          <th>금액</th>
+          <th>주기</th>
+          <th>구독 시작</th>
+        </tr>
+      </thead>
+      <tbody id="subTbl"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <div>
+      <strong>GenWave</strong> · AI영상서비스사업팀<br>
+      데이터 출처: 회원DB(users_20260605) · Stripe MRR Summary · subscriptions.csv
+    </div>
+    <div style="text-align:right">
+      기준일: <strong>2026년 6월 5일</strong><br>
+      다음 업데이트: 월말 정기 리포트
+    </div>
+  </div>
+
+</div>
+
+<script>
+const gc = 'rgba(0,0,0,0.06)';
+const tc = '#9D9A94';
+const base = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false} },
+  scales:{
+    x:{ ticks:{color:tc,font:{size:10,family:'DM Mono'}}, grid:{color:gc} },
+    y:{ ticks:{color:tc,font:{size:10,family:'DM Mono'}}, grid:{color:gc} }
+  }
+};
+
+// ③ 일별 데이터
+const allDaily = [{"d":"2026-01-01","n":2,"p":0},{"d":"2026-01-02","n":2,"p":0},{"d":"2026-01-03","n":5,"p":0},{"d":"2026-01-04","n":1,"p":0},{"d":"2026-01-05","n":1,"p":0},{"d":"2026-01-06","n":3,"p":0},{"d":"2026-01-07","n":2,"p":0},{"d":"2026-01-09","n":7,"p":0},{"d":"2026-01-10","n":4,"p":0},{"d":"2026-01-11","n":3,"p":0},{"d":"2026-01-12","n":3,"p":0},{"d":"2026-01-13","n":2,"p":0},{"d":"2026-01-14","n":6,"p":0},{"d":"2026-01-15","n":1,"p":0},{"d":"2026-01-16","n":2,"p":0},{"d":"2026-01-17","n":3,"p":0},{"d":"2026-01-18","n":5,"p":0},{"d":"2026-01-19","n":3,"p":0},{"d":"2026-01-20","n":3,"p":0},{"d":"2026-01-21","n":3,"p":0},{"d":"2026-01-22","n":3,"p":0},{"d":"2026-01-23","n":2,"p":0},{"d":"2026-01-24","n":2,"p":0},{"d":"2026-01-25","n":2,"p":0},{"d":"2026-01-27","n":3,"p":0},{"d":"2026-01-28","n":1,"p":0},{"d":"2026-01-29","n":6,"p":0},{"d":"2026-01-30","n":1,"p":0},{"d":"2026-02-01","n":4,"p":0},{"d":"2026-02-02","n":2,"p":1},{"d":"2026-02-03","n":5,"p":0},{"d":"2026-02-04","n":6,"p":0},{"d":"2026-02-05","n":5,"p":0},{"d":"2026-02-06","n":3,"p":0},{"d":"2026-02-07","n":4,"p":0},{"d":"2026-02-08","n":4,"p":0},{"d":"2026-02-09","n":1,"p":0},{"d":"2026-02-10","n":2,"p":0},{"d":"2026-02-11","n":17,"p":0},{"d":"2026-02-12","n":43,"p":2},{"d":"2026-02-13","n":14,"p":0},{"d":"2026-02-14","n":3,"p":0},{"d":"2026-02-15","n":2,"p":0},{"d":"2026-02-16","n":4,"p":0},{"d":"2026-02-17","n":2,"p":0},{"d":"2026-02-18","n":5,"p":0},{"d":"2026-02-19","n":4,"p":0},{"d":"2026-02-20","n":1,"p":0},{"d":"2026-02-21","n":2,"p":0},{"d":"2026-02-22","n":2,"p":0},{"d":"2026-02-23","n":4,"p":0},{"d":"2026-02-24","n":3,"p":0},{"d":"2026-02-25","n":3,"p":0},{"d":"2026-02-27","n":1,"p":0},{"d":"2026-03-03","n":3,"p":0},{"d":"2026-03-04","n":3,"p":0},{"d":"2026-03-05","n":1,"p":0},{"d":"2026-03-06","n":2,"p":0},{"d":"2026-03-07","n":2,"p":0},{"d":"2026-03-08","n":1,"p":0},{"d":"2026-03-09","n":4,"p":0},{"d":"2026-03-10","n":3,"p":0},{"d":"2026-03-12","n":2,"p":0},{"d":"2026-03-15","n":1,"p":1},{"d":"2026-03-16","n":1,"p":0},{"d":"2026-03-18","n":2,"p":0},{"d":"2026-03-19","n":1,"p":0},{"d":"2026-03-20","n":2,"p":0},{"d":"2026-03-22","n":1,"p":0},{"d":"2026-03-24","n":2,"p":0},{"d":"2026-03-26","n":1,"p":0},{"d":"2026-03-27","n":1,"p":0},{"d":"2026-03-30","n":1,"p":0},{"d":"2026-04-01","n":2,"p":2},{"d":"2026-04-02","n":1,"p":0},{"d":"2026-04-03","n":2,"p":0},{"d":"2026-04-04","n":1,"p":0},{"d":"2026-04-06","n":1,"p":1},{"d":"2026-04-07","n":1,"p":0},{"d":"2026-04-08","n":1,"p":0},{"d":"2026-04-09","n":1,"p":0},{"d":"2026-04-11","n":1,"p":0},{"d":"2026-04-12","n":1,"p":0},{"d":"2026-04-14","n":2,"p":1},{"d":"2026-04-15","n":4,"p":0},{"d":"2026-04-16","n":3,"p":0},{"d":"2026-04-17","n":3,"p":0},{"d":"2026-04-21","n":3,"p":0},{"d":"2026-04-22","n":13,"p":0},{"d":"2026-04-23","n":8,"p":0},{"d":"2026-04-24","n":5,"p":0},{"d":"2026-04-25","n":4,"p":0},{"d":"2026-04-27","n":1,"p":0},{"d":"2026-04-28","n":4,"p":0},{"d":"2026-04-29","n":7,"p":0},{"d":"2026-04-30","n":2,"p":0},{"d":"2026-05-03","n":1,"p":0},{"d":"2026-05-04","n":1,"p":0},{"d":"2026-05-06","n":3,"p":0},{"d":"2026-05-07","n":3,"p":0},{"d":"2026-05-08","n":2,"p":0},{"d":"2026-05-09","n":1,"p":0},{"d":"2026-05-10","n":3,"p":0},{"d":"2026-05-11","n":5,"p":0},{"d":"2026-05-12","n":7,"p":0},{"d":"2026-05-13","n":34,"p":0},{"d":"2026-05-14","n":139,"p":0},{"d":"2026-05-15","n":72,"p":1},{"d":"2026-05-16","n":2,"p":0},{"d":"2026-05-18","n":5,"p":1},{"d":"2026-05-19","n":3,"p":0},{"d":"2026-05-20","n":4,"p":0},{"d":"2026-05-21","n":3,"p":0},{"d":"2026-05-22","n":2,"p":0},{"d":"2026-05-23","n":2,"p":0},{"d":"2026-05-24","n":2,"p":0},{"d":"2026-05-25","n":4,"p":0},{"d":"2026-05-26","n":27,"p":0},{"d":"2026-05-27","n":1,"p":0},{"d":"2026-05-28","n":2,"p":0},{"d":"2026-05-29","n":5,"p":1},{"d":"2026-05-30","n":2,"p":0},{"d":"2026-05-31","n":2,"p":0},{"d":"2026-06-01","n":7,"p":1},{"d":"2026-06-03","n":1,"p":0},{"d":"2026-06-04","n":2,"p":2}];
+
+function mkDatasets(data, mode) {
+  return {
+    labels: data.map(d => mode==='all' ? d.d.slice(5) : d.d.slice(8)),
+    datasets:[
+      { label:'신규 가입',
+        data: data.map(d=>d.n),
+        backgroundColor: data.map(d=>d.p>0?'#00C49A':'#93B4F5'),
+        borderRadius: 3, yAxisID:'y' },
+      { label:'유료 전환', data:data.map(d=>d.p), type:'line',
+        borderColor:'#00C49A', backgroundColor:'transparent',
+        pointRadius:data.map(d=>d.p>0?5:0),
+        pointBackgroundColor:'#00C49A', tension:0.2, yAxisID:'y2' }
+    ]
+  };
+}
+
+const dailyOpts = {
+  ...base,
+  plugins:{...base.plugins,tooltip:{mode:'index',intersect:false,callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y}`}}},
+  scales:{
+    x:{ticks:{color:tc,font:{size:9,family:'DM Mono'},maxTicksLimit:18,maxRotation:45,autoSkip:true},grid:{color:gc}},
+    y:{ticks:{color:tc,font:{size:10,family:'DM Mono'}},grid:{color:gc}},
+    y2:{position:'right',min:0,max:4,ticks:{color:'#00C49A',font:{size:10,family:'DM Mono'},stepSize:1},grid:{display:false}}
+  }
+};
+
+let dailyChart = new Chart(document.getElementById('dailyChart'),{
+  type:'bar', data:mkDatasets(allDaily,'all'), options:dailyOpts
+});
+
+function setMonth(m, el) {
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  const data = m==='all' ? allDaily : allDaily.filter(d=>d.d.startsWith('2026-'+m));
+  dailyChart.data = mkDatasets(data, m);
+  const total = data.reduce((s,d)=>s+d.n,0);
+  const paid = data.reduce((s,d)=>s+d.p,0);
+  document.getElementById('dailyNote').textContent = m==='all'
+    ? '전체 126일 표시 · 초록 막대 = 유료 전환 발생일 · 5/14 KOBA 효과 139명 최대'
+    : `${m}월 — 총 ${total}명 가입 / 유료 전환 ${paid}건`;
+  dailyChart.update();
+}
+
+// ④ MRR 추이
+const mrrL=['25.5','25.6','25.7','25.8','25.9','25.10','25.11','25.12','26.1','26.2','26.3','26.4','26.5','26.6'];
+const mrrD=[51,726,371,522,186,182,228.2,191,155,158.25,253.95,412.65,305.15,337.85];
+new Chart(document.getElementById('mrrChart'),{
+  type:'bar',
+  data:{labels:mrrL,datasets:[
+    { label:'MRR', data:mrrD, borderRadius:4,
+      backgroundColor:mrrD.map((v,i)=>i===1?'#2563EB':i===13?'#00C49A':i===11?'rgba(0,196,154,0.6)':i===12?'rgba(232,71,42,0.5)':'rgba(147,180,245,0.7)'),
+      order:2 },
+    { label:'추이', data:mrrD, type:'line',
+      borderColor:'#2563EB', backgroundColor:'transparent',
+      pointRadius:3, tension:0.3, borderWidth:1.5, order:1,
+      pointBackgroundColor:mrrD.map((v,i)=>i===13?'#00C49A':'#2563EB') }
+  ]},
+  options:{...base,
+    plugins:{...base.plugins,tooltip:{callbacks:{label:c=>`MRR: $${c.parsed.y.toFixed(2)}`}}},
+    scales:{x:base.scales.x,y:{...base.scales.y,ticks:{...base.scales.y.ticks,callback:v=>'$'+v}}}}
+});
+
+// ⑤ 구독자 테이블
+const subs=[
+  {name:'PARK DONG HYUN',email:'kkorea7107@gmail.com',amt:'$55.20',interval:'월간',start:'2026-06-04'},
+  {name:'KIM SUNG JIN',email:'sj98525@naver.com',amt:'$9.00',interval:'월간',start:'2026-05-25'},
+  {name:'KIM SUNJU',email:'ksunju426@gmail.com',amt:'$55.20',interval:'월간',start:'2026-05-21'},
+  {name:'SUN JU KIM',email:'ksunju426@mediacan.co.kr',amt:'$9.00',interval:'월간',start:'2026-05-21'},
+  {name:'PARK DONG HYUN',email:'kkorea7107@gmail.net',amt:'$22.50',interval:'월간',start:'2026-05-15'},
+  {name:'LIM JINMYUNG',email:'jinmyung.lim@gmail.com',amt:'$9.00',interval:'월간',start:'2026-05-07'},
+  {name:'김민수',email:'ulmolum@gmail.com',amt:'$9.00',interval:'월간',start:'2026-03-30'},
+  {name:'Diquest',email:'ploonet.production@gmail.com',amt:'$55.20',interval:'월간',start:'2026-03-10'},
+  {name:'SHIM MINJI',email:'shimm23@naver.com',amt:'$9.00',interval:'월간',start:'2026-03-06'},
+  {name:'kofpi',email:'logu11@kofpi.or.kr',amt:'$255.00',interval:'연간',start:'2026-02-02'},
+  {name:'김광명',email:'doguking@naver.com',amt:'$9.00',interval:'월간',start:'2025-12-02'},
+  {name:'문홍식',email:'nitangel@naver.com',amt:'$102.00',interval:'연간',start:'2025-08-23'},
+  {name:'park sung su',email:'1997010801@hanmail.net',amt:'$9.00',interval:'월간',start:'2025-08-20'},
+  {name:'김진수',email:'js72441388@gmail.com',amt:'$264.00',interval:'연간',start:'2025-07-17'},
+  {name:'김영룡',email:'gpapapa93@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-20'},
+  {name:'LEE JAEJUN',email:'semirush@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-10'},
+  {name:'kim su yeol',email:'ilovejump1127@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-09'},
+];
+const tb = document.getElementById('subTbl');
+subs.forEach(s=>{
+  const isYear = s.interval==='연간';
+  const tr = document.createElement('tr');
+  tr.innerHTML=`
+    <td style="font-weight:500">${s.name}</td>
+    <td class="mono" style="color:var(--text2);font-size:11px">${s.email}</td>
+    <td class="mono" style="font-weight:700">${s.amt}</td>
+    <td><span style="font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;background:${isYear?'#EEEDFE':'#EFF4FF'};color:${isYear?'#534AB7':'#2563EB'}">${s.interval}</span></td>
+    <td class="mono" style="color:var(--text3);font-size:11px">${s.start}</td>`;
+  tb.appendChild(tr);
+});
+</script>
+</body>
+</html>
