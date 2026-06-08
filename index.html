@@ -288,7 +288,7 @@
       <div class="kpi-label">누적 가입자</div>
       <div class="kpi-value blue">6,521명</div>
       <div class="kpi-sub">25.5 출시 ~ 26.6.7</div>
-      <span class="badge blue">전환율 0.67%</span>
+      <span class="badge blue">활성 전환율 0.26%</span>
     </div>
     <div class="kpi">
       <div class="kpi-label">활성 구독자 (PG)</div>
@@ -316,15 +316,15 @@
       </div>
       <div class="funnel-row">
         <span class="funnel-label">무료 회원</span>
-        <div class="funnel-track"><div class="funnel-bar" style="width:99.3%;background:#93B4F5">6,477명</div></div>
-        <span class="funnel-val">6,477 (99.3%)</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:99.74%;background:#93B4F5">6,504명</div></div>
+        <span class="funnel-val">6,504 (99.74%)</span>
       </div>
       <div class="funnel-row">
         <span class="funnel-label">유료 전환</span>
-        <div class="funnel-track"><div class="funnel-bar" style="width:0.7%;background:#00C49A;min-width:40px">44명</div></div>
-        <span class="funnel-val" style="color:var(--mint-dark);font-weight:700">44 (0.67%)</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:0.26%;background:#00C49A;min-width:40px">17명</div></div>
+        <span class="funnel-val" style="color:var(--mint-dark);font-weight:700">17 (0.26%)</span>
       </div>
-      <p class="note">* PG subscriptions 기준 현재 활성 17명 / DB 유료 플랜 보유 이력 44명<br>* 1,000명 유료 목표까지 956명 전환 필요</p>
+      <p class="note">* PG subscriptions 기준 현재 활성 구독자 17명 (전원 active)<br>* 1,000명 유료 목표까지 983명 전환 필요</p>
     </div>
     <div class="card">
       <div class="card-title">플랜별 구독자 (17명)</div>
@@ -530,13 +530,20 @@ const subs=[
   {name:'LEE JAEJUN',email:'semirush@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-10'},
   {name:'kim su yeol',email:'ilovejump1127@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-09'},
 ];
+function maskEmail(email) {
+  const [local, domain] = email.split('@');
+  const masked = local.length <= 2
+    ? local[0] + '*'.repeat(local.length - 1)
+    : local.slice(0, 2) + '*'.repeat(local.length - 2);
+  return masked + '@' + domain;
+}
 const tb = document.getElementById('subTbl');
 subs.forEach(s=>{
   const isYear = s.interval==='연간';
   const tr = document.createElement('tr');
   tr.innerHTML=`
     <td style="font-weight:500">${s.name}</td>
-    <td class="mono" style="color:var(--text2);font-size:11px">${s.email}</td>
+    <td class="mono" style="color:var(--text2);font-size:11px">${maskEmail(s.email)}</td>
     <td class="mono" style="font-weight:700">${s.amt}</td>
     <td><span style="font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;background:${isYear?'#EEEDFE':'#EFF4FF'};color:${isYear?'#534AB7':'#2563EB'}">${s.interval}</span></td>
     <td class="mono" style="color:var(--text3);font-size:11px">${s.start}</td>`;
