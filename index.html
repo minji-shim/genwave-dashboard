@@ -257,6 +257,29 @@
     color: var(--text3);
   }
   .footer strong { color: var(--text2); }
+
+  .week-tab {
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .week-tab.on { background: var(--text); color: #fff; border-color: var(--text); font-weight: 500; }
+
+  .warn {
+    background: var(--amber-light);
+    border: 1px solid rgba(217,119,6,0.25);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #92600A;
+    margin-top: 14px;
+    line-height: 1.6;
+  }
 </style>
 </head>
 <body>
@@ -419,10 +442,58 @@
     </div>
   </div>
 
+  <!-- ⑥ 채널별 유입 분석 -->
+  <div class="section-label">⑥ 채널별 유입 분석 (GA4 · 주차별)</div>
+  <div class="card" style="padding:16px 20px 0">
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="weekTabs">
+      <button class="week-tab on" onclick="setWeek('w1',this)">6월 1주차 (6/1~7)</button>
+      <button class="week-tab" onclick="setWeek('w2',this)">6월 2주차 (6/8~14)</button>
+      <button class="week-tab" onclick="setWeek('w3',this)">6월 3주차 (6/15~17)</button>
+    </div>
+    <div class="two-col">
+      <div class="card" style="background:var(--surface2);border:none">
+        <div class="card-title">신규 사용자 — 채널별</div>
+        <div class="chart-box h220"><canvas id="channelUserChart"></canvas></div>
+      </div>
+      <div class="card" style="background:var(--surface2);border:none">
+        <div class="card-title">채널별 전환 효율 (주요 이벤트 / 신규 사용자)</div>
+        <div class="chart-box h220"><canvas id="channelConvChart"></canvas></div>
+      </div>
+    </div>
+    <p class="note" id="weekNote" style="margin-bottom:4px"></p>
+    <div style="background:var(--surface);border-radius:var(--radius-sm);overflow:hidden;margin:12px 0 20px">
+      <table class="sub-table">
+        <thead><tr><th>채널</th><th>설명</th><th style="text-align:right">신규 사용자</th><th style="text-align:right">가입(sign_up)</th><th style="text-align:right">전환율</th></tr></thead>
+        <tbody id="channelTbl"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="section-label" style="margin-top:28px">⑥-1 전체 기간 베이스라인 (GA4 · 25.5.1 ~ 26.6.17)</p>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">신규 사용자 — 채널별 (누적)</div>
+      <div class="chart-box h220"><canvas id="baseUserChart"></canvas></div>
+      <p class="note">Paid Social이 누적 신규 사용자 18,222명으로 1위 — 전체 채널 합계의 절반 이상 차지</p>
+    </div>
+    <div class="card">
+      <div class="card-title">가입(sign_up) — 채널별 (25.6.29~)</div>
+      <div class="chart-box h220"><canvas id="baseSignupChart"></canvas></div>
+      <p class="note">Organic Search가 가입 1,002명(38.1%)으로 압도적 1위 — Paid Social은 5위(281명, 10.7%)</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
+    <table class="sub-table">
+      <thead><tr><th>채널</th><th>설명</th><th style="text-align:right">신규 사용자(누적)</th><th style="text-align:right">가입(누적)</th><th style="text-align:right">가입 전환율</th></tr></thead>
+      <tbody id="baseTbl"></tbody>
+    </table>
+  </div>
+  <div class="warn">⚠ Paid Social은 신규 사용자 압도적 1위지만 가입 전환율 1.5%로 전체 평균(약 4~5%대 추정)보다 낮음. 같은 패턴이 6/15~17 단기 데이터에서도 동일하게 확인됨 — 일시적 현상이 아닌 구조적 비효율로 판단됨. 광고비 재배분 검토 필요.</div>
+
   <div class="footer">
     <div>
       <strong>GenWave</strong> · AI영상서비스사업팀<br>
-      데이터 출처: 회원DB(genwave-users_20260617) · Stripe MRR Summary · subscriptions.csv
+      데이터 출처: 회원DB(genwave-users_20260617) · Stripe MRR Summary · subscriptions.csv · GA4
     </div>
     <div style="text-align:right">
       기준일: <strong>2026년 6월 17일</strong><br>
@@ -603,6 +674,205 @@ function switchTab(tab) {
   document.getElementById('tabCanceled').style.color = isActive ? '#6B6861' : '#fff';
   document.getElementById('tabCanceled').style.borderColor = isActive ? '#D1CFC9' : '#1A1917';
 }
+
+// ⑥ 채널별 유입 분석
+// ⑥ 주차별 채널 데이터
+const descMap = {
+  'Paid Social':'메타·인스타그램 등 유료 소셜 광고',
+  'Organic Search':'네이버·구글 등 자연 검색 유입',
+  'Direct':'URL 직접 입력 또는 북마크 접속',
+  'Organic Social':'무료 소셜 게시물/공유를 통한 유입',
+  'Referral':'블로그·외부 사이트 링크 클릭',
+  'Organic Video':'유튜브 등 동영상 콘텐츠를 통한 유입',
+  'Organic Shopping':'쇼핑 관련 자연 유입(쇼핑 탭 등)',
+  'Paid Search':'네이버·구글 검색 광고(키워드 광고)',
+  'Paid Other':'기타 유료 광고(디스플레이 등)',
+  'Unassigned':'채널 분류 불가/미할당 트래픽',
+  'AI Assistant':'AI 챗봇/어시스턴트 추천을 통한 유입',
+};
+const chColors = {
+  'Paid Social':'#2563EB','Organic Search':'#00C49A','Direct':'#93B4F5',
+  'Organic Social':'#D97706','Referral':'#534AB7','Organic Video':'#E84722',
+  'Organic Shopping':'#16A34A','Paid Search':'#0EA5E9','Paid Other':'#6366F1',
+  'Unassigned':'#9D9A94','AI Assistant':'#9D9A94'
+};
+
+const weekData = {
+  w1: {
+    label: '6월 1주차 (6/1~7)',
+    note: 'Organic Search가 가입 7명으로 1위 — 이 기간 Paid Social 유입 없음',
+    rows: [
+      { ch:'Direct', users:94, signups:6 },
+      { ch:'Organic Search', users:63, signups:7 },
+      { ch:'Organic Social', users:20, signups:1 },
+      { ch:'Referral', users:4, signups:1 },
+      { ch:'Unassigned', users:8, signups:0 },
+      { ch:'Organic Shopping', users:0, signups:0 },
+      { ch:'Paid Other', users:0, signups:0 },
+    ]
+  },
+  w2: {
+    label: '6월 2주차 (6/8~14)',
+    note: 'Referral(블로그) 전환율 100% — 다만 볼륨 3명으로 작음. Paid Social은 1명 유입, 가입 0건',
+    rows: [
+      { ch:'Direct', users:83, signups:3 },
+      { ch:'Organic Search', users:66, signups:6 },
+      { ch:'Referral', users:18, signups:3 },
+      { ch:'Paid Search', users:8, signups:0 },
+      { ch:'Organic Video', users:6, signups:1 },
+      { ch:'Organic Shopping', users:0, signups:1 },
+      { ch:'Organic Social', users:2, signups:0 },
+      { ch:'Paid Social', users:0, signups:0 },
+    ]
+  },
+  w3: {
+    label: '6월 3주차 (6/15~17)',
+    note: 'Paid Social 라이브 이후 신규 사용자 51명으로 최다 유입이지만 가입 3명(5.9%)에 그침 — Organic Search는 42명 중 6명(14.3%) 전환',
+    rows: [
+      { ch:'Paid Social', users:51, signups:3 },
+      { ch:'Organic Search', users:42, signups:6 },
+      { ch:'Direct', users:18, signups:0 },
+      { ch:'Organic Social', users:22, signups:0 },
+      { ch:'Referral', users:4, signups:0 },
+      { ch:'Organic Video', users:6, signups:0 },
+      { ch:'AI Assistant', users:2, signups:0 },
+    ]
+  }
+};
+
+Object.values(weekData).forEach(w => {
+  w.rows.forEach(r => { r.desc = descMap[r.ch] || ''; r.rate = r.users > 0 ? (r.signups / r.users * 100) : 0; });
+});
+
+let userChartInstance, convChartInstance;
+
+function renderWeek(weekKey) {
+  const w = weekData[weekKey];
+  const sorted = [...w.rows].sort((a,b)=>b.users-a.users);
+
+  if (userChartInstance) userChartInstance.destroy();
+  if (convChartInstance) convChartInstance.destroy();
+
+  userChartInstance = new Chart(document.getElementById('channelUserChart'),{
+    type:'bar',
+    data:{ labels: sorted.map(c=>c.ch),
+      datasets:[{ data: sorted.map(c=>c.users), backgroundColor: sorted.map(c=>chColors[c.ch]||'#9D9A94'), borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`신규 사용자: ${c.parsed.x}명`}} },
+      scales:{ x:{ticks:{color:tc,font:{size:10,family:'DM Mono'}},grid:{color:gc}},
+               y:{ticks:{color:tc,font:{size:11}},grid:{display:false}} } }
+  });
+
+  const sortedByRate = [...w.rows].sort((a,b)=>b.rate-a.rate);
+  convChartInstance = new Chart(document.getElementById('channelConvChart'),{
+    type:'bar',
+    data:{ labels: sortedByRate.map(c=>c.ch),
+      datasets:[{ data: sortedByRate.map(c=>c.rate.toFixed(1)), backgroundColor: sortedByRate.map(c=>chColors[c.ch]||'#9D9A94'), borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`가입 전환율: ${c.parsed.x}%`}} },
+      scales:{ x:{ticks:{color:tc,font:{size:10,family:'DM Mono'},callback:v=>v+'%'},grid:{color:gc}},
+               y:{ticks:{color:tc,font:{size:11}},grid:{display:false}} } }
+  });
+
+  const chTb = document.getElementById('channelTbl');
+  chTb.innerHTML = '';
+  sorted.forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:500"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${chColors[c.ch]||'#9D9A94'};margin-right:6px"></span>${c.ch}</td>
+      <td style="color:var(--text3);font-size:11px">${c.desc}</td>
+      <td class="mono" style="text-align:right;font-weight:500">${c.users}</td>
+      <td class="mono" style="text-align:right;font-weight:700;color:${c.signups>0?'var(--mint-dark)':'var(--text3)'}">${c.signups}</td>
+      <td class="mono" style="text-align:right;font-weight:500;color:${c.rate>15?'var(--mint-dark)':c.rate>5?'var(--text2)':c.users>0?'#E8472A':'var(--text3)'}">${c.rate.toFixed(1)}%</td>`;
+    chTb.appendChild(tr);
+  });
+  const totalUsers = w.rows.reduce((s,c)=>s+c.users,0);
+  const totalSignups = w.rows.reduce((s,c)=>s+c.signups,0);
+  const totalTr = document.createElement('tr');
+  totalTr.innerHTML = `
+    <td colspan="2" style="text-align:right;font-weight:500;color:var(--text2)">합계</td>
+    <td class="mono" style="text-align:right;font-weight:700">${totalUsers}</td>
+    <td class="mono" style="text-align:right;font-weight:700;color:var(--mint-dark)">${totalSignups}</td>
+    <td class="mono" style="text-align:right;font-weight:700">${(totalSignups/totalUsers*100).toFixed(1)}%</td>`;
+  chTb.appendChild(totalTr);
+
+  document.getElementById('weekNote').textContent = w.note;
+}
+
+function setWeek(weekKey, el) {
+  document.querySelectorAll('.week-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  renderWeek(weekKey);
+}
+
+renderWeek('w1');
+
+// ⑥-1 전체 기간 베이스라인
+const baseData = [
+  { ch:'Paid Social', desc:'메타·인스타그램 등 유료 소셜 광고', users:18222, signups:281 },
+  { ch:'Direct', desc:'URL 직접 입력 또는 북마크 접속', users:7506, signups:489 },
+  { ch:'Organic Search', desc:'네이버·구글 등 자연 검색 유입', users:5280, signups:1002 },
+  { ch:'Unassigned', desc:'채널 분류 불가/미할당 트래픽', users:3161, signups:294 },
+  { ch:'Paid Other', desc:'기타 유료 광고(디스플레이 등)', users:3031, signups:378 },
+  { ch:'Paid Search', desc:'네이버·구글 검색 광고(키워드 광고)', users:2097, signups:114 },
+  { ch:'Referral', desc:'블로그·외부 사이트 링크 클릭', users:506, signups:39 },
+  { ch:'Organic Social', desc:'무료 소셜 게시물/공유를 통한 유입', users:320, signups:20 },
+  { ch:'Cross-network', desc:'여러 광고 네트워크 결합 캠페인', users:89, signups:2 },
+  { ch:'Paid Video', desc:'유튜브 등 유료 동영상 광고', users:52, signups:0 },
+  { ch:'Organic Video', desc:'유튜브 등 동영상 콘텐츠를 통한 유입', users:40, signups:11 },
+  { ch:'Organic Shopping', desc:'쇼핑 관련 자연 유입(쇼핑 탭 등)', users:6, signups:6 },
+];
+baseData.forEach(c => c.rate = c.users > 0 ? (c.signups / c.users * 100) : 0);
+
+const baseColors = {
+  'Paid Social':'#2563EB','Direct':'#93B4F5','Organic Search':'#00C49A','Unassigned':'#9D9A94',
+  'Paid Other':'#6366F1','Paid Search':'#0EA5E9','Referral':'#534AB7','Organic Social':'#D97706',
+  'Cross-network':'#DB2777','Paid Video':'#64748B','Organic Video':'#E84722','Organic Shopping':'#16A34A'
+};
+
+const sortedByUsers = [...baseData].sort((a,b)=>b.users-a.users);
+new Chart(document.getElementById('baseUserChart'),{
+  type:'bar',
+  data:{
+    labels: sortedByUsers.map(c=>c.ch),
+    datasets:[{ data: sortedByUsers.map(c=>c.users),
+      backgroundColor: sortedByUsers.map(c=>baseColors[c.ch]), borderRadius:4 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`신규 사용자: ${c.parsed.x.toLocaleString()}명`}} },
+    scales:{ x:{ticks:{color:tc,font:{size:9,family:'DM Mono'},callback:v=>v>=1000?v/1000+'k':v},grid:{color:gc}},
+             y:{ticks:{color:tc,font:{size:10}},grid:{display:false}} }
+  }
+});
+
+const sortedBySignup = [...baseData].sort((a,b)=>b.signups-a.signups);
+new Chart(document.getElementById('baseSignupChart'),{
+  type:'bar',
+  data:{
+    labels: sortedBySignup.map(c=>c.ch),
+    datasets:[{ data: sortedBySignup.map(c=>c.signups),
+      backgroundColor: sortedBySignup.map(c=>baseColors[c.ch]), borderRadius:4 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>`가입: ${c.parsed.x.toLocaleString()}명`}} },
+    scales:{ x:{ticks:{color:tc,font:{size:9,family:'DM Mono'}},grid:{color:gc}},
+             y:{ticks:{color:tc,font:{size:10}},grid:{display:false}} }
+  }
+});
+
+const baseTb = document.getElementById('baseTbl');
+sortedByUsers.forEach(c=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML=`
+    <td style="font-weight:500"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${baseColors[c.ch]};margin-right:6px"></span>${c.ch}</td>
+    <td style="color:var(--text3);font-size:11px">${c.desc}</td>
+    <td class="mono" style="text-align:right;font-weight:500">${c.users.toLocaleString()}</td>
+    <td class="mono" style="text-align:right;font-weight:700;color:${c.signups>0?'var(--mint-dark)':'var(--text3)'}">${c.signups.toLocaleString()}</td>
+    <td class="mono" style="text-align:right;font-weight:500;color:${c.rate>15?'var(--mint-dark)':c.rate>5?'var(--text2)':'#E8472A'}">${c.rate.toFixed(1)}%</td>`;
+  baseTb.appendChild(tr);
+});
 </script>
 </body>
 </html>
