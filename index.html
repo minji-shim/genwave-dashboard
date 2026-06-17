@@ -446,7 +446,8 @@
   <div class="section-label">⑥ 채널별 유입 분석 (GA4 · 주차별)</div>
   <div class="card" style="padding:16px 20px 0">
     <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap" id="weekTabs">
-      <button class="week-tab on" onclick="setWeek('w1',this)">6월 1주차 (6/1~7)</button>
+      <button class="week-tab on" onclick="setWeek('total',this)">전체 집계 (6/1~17)</button>
+      <button class="week-tab" onclick="setWeek('w1',this)">6월 1주차 (6/1~7)</button>
       <button class="week-tab" onclick="setWeek('w2',this)">6월 2주차 (6/8~14)</button>
       <button class="week-tab" onclick="setWeek('w3',this)">6월 3주차 (6/15~17)</button>
     </div>
@@ -740,6 +741,24 @@ const weekData = {
   }
 };
 
+// 전체 집계 (1~3주차 합산)
+function buildTotal() {
+  const merged = {};
+  ['w1','w2','w3'].forEach(k=>{
+    weekData[k].rows.forEach(r=>{
+      if (!merged[r.ch]) merged[r.ch] = { ch:r.ch, users:0, signups:0 };
+      merged[r.ch].users += r.users;
+      merged[r.ch].signups += r.signups;
+    });
+  });
+  return Object.values(merged);
+}
+weekData.total = {
+  label: '전체 집계 (6/1~17)',
+  note: '3주간 합산 기준 Direct·Organic Search가 유입과 가입 모두 상위권. Paid Social은 누적 신규 사용자 52명 중 가입 3명(5.8%)으로 가장 낮은 전환율',
+  rows: buildTotal()
+};
+
 Object.values(weekData).forEach(w => {
   w.rows.forEach(r => { r.desc = descMap[r.ch] || ''; r.rate = r.users > 0 ? (r.signups / r.users * 100) : 0; });
 });
@@ -805,7 +824,7 @@ function setWeek(weekKey, el) {
   renderWeek(weekKey);
 }
 
-renderWeek('w1');
+renderWeek('total');
 
 // ⑥-1 전체 기간 베이스라인
 const baseData = [
