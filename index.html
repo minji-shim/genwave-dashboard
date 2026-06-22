@@ -402,6 +402,26 @@
     <p class="note" id="dailyNote">전체 380일 표시 · 초록 막대 = 유료 전환 발생일 · 25.6월 대규모 유입 / 26.5월 KOBA 효과</p>
   </div>
 
+  <!-- ③-1 일별 KPI 추이 -->
+  <div class="section-label">③-1 일별 KPI 추이 — 유입 · 가입 · 유료 전환 (2026.04.22~06.22)</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div class="tabs" style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="tab-btn on" onclick="setKpi('all',this)">전체</button>
+        <button class="tab-btn" onclick="setKpi('04',this)">4월</button>
+        <button class="tab-btn" onclick="setKpi('05',this)">5월</button>
+        <button class="tab-btn" onclick="setKpi('06',this)">6월</button>
+      </div>
+      <div class="legend">
+        <span><span class="ldot" style="background:rgba(37,99,235,0.4)"></span>유입 (GA4)</span>
+        <span><span class="ldot" style="background:#00C49A"></span>가입 (회원DB)</span>
+        <span><span class="ldot" style="background:#E84722;border-radius:50%"></span>유료 전환 (PG)</span>
+      </div>
+    </div>
+    <div class="chart-box h220"><canvas id="kpiChart"></canvas></div>
+    <p class="note" id="kpiNote">전체 62일 · 6/16 광고 라이브 후 유입 급증 · 유료 전환은 PG 신규 구독 기준</p>
+  </div>
+
   <!-- ④ MRR 추이 -->
   <div class="section-label">④ MRR 전체 추이 (2025.05 ~ 2026.06)</div>
   <div class="card">
@@ -969,6 +989,44 @@ sortedByUsers.forEach(c=>{
     <td class="mono" style="text-align:right;font-weight:500;color:${c.rate>15?'var(--mint-dark)':c.rate>5?'var(--text2)':'#E8472A'}">${c.rate.toFixed(1)}%</td>`;
   baseTb.appendChild(tr);
 });
+
+// ③-1 일별 KPI 추이
+const kpiAll = [{"d":"2026-04-22","users":11,"signups":2,"paid":0},{"d":"2026-04-23","users":11,"signups":8,"paid":0},{"d":"2026-04-24","users":13,"signups":5,"paid":0},{"d":"2026-04-25","users":12,"signups":4,"paid":0},{"d":"2026-04-27","users":3,"signups":1,"paid":0},{"d":"2026-04-28","users":8,"signups":4,"paid":0},{"d":"2026-04-29","users":13,"signups":7,"paid":0},{"d":"2026-04-30","users":6,"signups":2,"paid":0},{"d":"2026-05-03","users":5,"signups":1,"paid":0},{"d":"2026-05-04","users":2,"signups":1,"paid":0},{"d":"2026-05-06","users":4,"signups":3,"paid":0},{"d":"2026-05-07","users":8,"signups":3,"paid":0},{"d":"2026-05-08","users":5,"signups":2,"paid":0},{"d":"2026-05-09","users":4,"signups":1,"paid":0},{"d":"2026-05-10","users":6,"signups":3,"paid":0},{"d":"2026-05-11","users":10,"signups":5,"paid":0},{"d":"2026-05-12","users":15,"signups":7,"paid":0},{"d":"2026-05-13","users":52,"signups":34,"paid":0},{"d":"2026-05-14","users":330,"signups":139,"paid":0},{"d":"2026-05-15","users":157,"signups":72,"paid":1},{"d":"2026-05-16","users":9,"signups":2,"paid":0},{"d":"2026-05-18","users":11,"signups":5,"paid":0},{"d":"2026-05-19","users":9,"signups":3,"paid":0},{"d":"2026-05-20","users":8,"signups":4,"paid":0},{"d":"2026-05-21","users":11,"signups":3,"paid":0},{"d":"2026-05-22","users":8,"signups":2,"paid":0},{"d":"2026-05-23","users":6,"signups":2,"paid":0},{"d":"2026-05-24","users":5,"signups":2,"paid":0},{"d":"2026-05-25","users":9,"signups":4,"paid":0},{"d":"2026-05-26","users":36,"signups":27,"paid":0},{"d":"2026-05-27","users":4,"signups":1,"paid":0},{"d":"2026-05-28","users":7,"signups":2,"paid":0},{"d":"2026-05-29","users":10,"signups":5,"paid":1},{"d":"2026-05-30","users":6,"signups":2,"paid":0},{"d":"2026-05-31","users":6,"signups":2,"paid":0},{"d":"2026-06-01","users":16,"signups":7,"paid":1},{"d":"2026-06-03","users":5,"signups":1,"paid":0},{"d":"2026-06-04","users":9,"signups":2,"paid":1},{"d":"2026-06-05","users":6,"signups":3,"paid":0},{"d":"2026-06-06","users":4,"signups":1,"paid":0},{"d":"2026-06-08","users":3,"signups":1,"paid":0},{"d":"2026-06-09","users":9,"signups":4,"paid":1},{"d":"2026-06-11","users":8,"signups":4,"paid":0},{"d":"2026-06-12","users":5,"signups":2,"paid":0},{"d":"2026-06-13","users":8,"signups":0,"paid":0},{"d":"2026-06-14","users":8,"signups":4,"paid":0},{"d":"2026-06-15","users":28,"signups":1,"paid":0},{"d":"2026-06-16","users":78,"signups":14,"paid":1},{"d":"2026-06-17","users":303,"signups":24,"paid":0},{"d":"2026-06-18","users":173,"signups":7,"paid":0},{"d":"2026-06-19","users":780,"signups":15,"paid":0},{"d":"2026-06-20","users":1521,"signups":16,"paid":0},{"d":"2026-06-21","users":1361,"signups":26,"paid":0},{"d":"2026-06-22","users":443,"signups":2,"paid":0}];
+
+const kpiOpts = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{legend:{display:false}, tooltip:{mode:'index',intersect:false}},
+  scales:{
+    x:{ticks:{color:tc,font:{size:9,family:'DM Mono'},maxTicksLimit:16,maxRotation:45,autoSkip:true},grid:{color:gc}},
+    y:{ticks:{color:tc,font:{size:10,family:'DM Mono'}},grid:{color:gc},title:{display:true,text:'유입',color:tc,font:{size:10}}},
+    y2:{position:'right',ticks:{color:tc,font:{size:10,family:'DM Mono'}},grid:{display:false},title:{display:true,text:'가입/유료',color:tc,font:{size:10}}}
+  }
+};
+
+function mkKpiDs(data){
+  return {
+    labels: data.map(d=>d.d.slice(5)),
+    datasets:[
+      {label:'유입(GA4)',data:data.map(d=>d.users),type:'bar',backgroundColor:'rgba(37,99,235,0.35)',borderRadius:2,yAxisID:'y'},
+      {label:'가입',data:data.map(d=>d.signups),type:'line',borderColor:'#00C49A',backgroundColor:'transparent',pointRadius:data.map(d=>d.signups>0?2:0),tension:0.3,borderWidth:2,yAxisID:'y2'},
+      {label:'유료 전환',data:data.map(d=>d.paid),type:'line',borderColor:'#E84722',backgroundColor:'transparent',pointRadius:data.map(d=>d.paid>0?6:0),pointBackgroundColor:'#E84722',tension:0.2,borderWidth:1.5,yAxisID:'y2'}
+    ]
+  };
+}
+
+let kpiChart = new Chart(document.getElementById('kpiChart'),{type:'bar', data:mkKpiDs(kpiAll), options:kpiOpts});
+
+function setKpi(m, el) {
+  document.querySelectorAll('.tab-btn').forEach(t=>{ if(t.onclick&&t.onclick.toString().includes('setKpi')) t.classList.remove('on'); });
+  el.classList.add('on');
+  const data = m==='all' ? kpiAll : kpiAll.filter(d=>d.d.startsWith('2026-'+m));
+  kpiChart.data = mkKpiDs(data);
+  const tu=data.reduce((s,d)=>s+d.users,0), ts=data.reduce((s,d)=>s+d.signups,0), tp=data.reduce((s,d)=>s+d.paid,0);
+  document.getElementById('kpiNote').textContent = m==='all'
+    ? '전체 62일 · 6/16 광고 라이브 후 유입 급증 · 유료 전환은 PG 신규 구독 기준'
+    : `${m}월 — 유입 ${tu.toLocaleString()}명 / 가입 ${ts}명 / 유료 전환 ${tp}건`;
+  kpiChart.update();
+}
 </script>
 </body>
 </html>
