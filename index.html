@@ -315,9 +315,9 @@
     </div>
     <div class="kpi">
       <div class="kpi-label">활성 구독자 (PG)</div>
-      <div class="kpi-value">17명</div>
+      <div class="kpi-value">13명</div>
       <div class="kpi-sub">전원 active 상태</div>
-      <span class="badge amber">전환율 0.26%</span>
+      <span class="badge amber">전환율 0.20%</span>
     </div>
     <div class="kpi">
       <div class="kpi-label">누적 MRR 합계 (출시~현재)</div>
@@ -344,28 +344,20 @@
       </div>
       <div class="funnel-row">
         <span class="funnel-label">유료 전환</span>
-        <div class="funnel-track"><div class="funnel-bar" style="width:0.26%;background:#00C49A;min-width:40px">17명</div></div>
-        <span class="funnel-val" style="color:var(--mint-dark);font-weight:700">17 (0.26%)</span>
+        <div class="funnel-track"><div class="funnel-bar" style="width:0.20%;background:#00C49A;min-width:40px">13명</div></div>
+        <span class="funnel-val" style="color:var(--mint-dark);font-weight:700">13 (0.20%)</span>
       </div>
-      <p class="note">* PG subscriptions 기준 현재 활성 구독자 17명 (전원 active)<br>* 1,000명 유료 목표까지 983명 전환 필요</p>
+      <p class="note">* PG subscriptions 기준 현재 활성 구독자 13명<br>* 1,000명 유료 목표까지 987명 전환 필요</p>
     </div>
     <div class="card">
-      <div class="card-title">플랜별 구독자 (17명)</div>
+      <div class="card-title">플랜별 구독자 (13명)</div>
       <div class="plan-row">
         <span class="plan-pill" style="background:#EFF4FF;color:#2563EB">$9 / month</span>
-        <span class="plan-count">7명</span>
-      </div>
-      <div class="plan-row">
-        <span class="plan-pill" style="background:#E6FAF5;color:#008F6F">$22 / month</span>
-        <span class="plan-count">4명</span>
+        <span class="plan-count">6명</span>
       </div>
       <div class="plan-row">
         <span class="plan-pill" style="background:#FDF0ED;color:#E8472A">$55.20 / month</span>
-        <span class="plan-count">3명</span>
-      </div>
-      <div class="plan-row">
-        <span class="plan-pill" style="background:#FFFBEB;color:#D97706">$22.50 / month</span>
-        <span class="plan-count">1명</span>
+        <span class="plan-count">2명</span>
       </div>
       <div class="plan-row">
         <span class="plan-pill" style="background:#EEEDFE;color:#534AB7">연간 구독</span>
@@ -373,7 +365,7 @@
       </div>
       <div class="plan-row" style="border:none;padding-top:12px;margin-top:2px">
         <span style="font-size:11px;color:var(--text3)">월 환산 MRR 합계</span>
-        <span class="plan-count" style="color:var(--mint-dark)">$337.85</span>
+        <span class="plan-count" style="color:var(--mint-dark)">$260.15</span>
       </div>
     </div>
   </div>
@@ -425,8 +417,8 @@
   <div class="section-label">⑤ 구독자 현황</div>
   <div class="card" style="padding:16px 20px 0">
     <div style="display:flex;gap:6px;margin-bottom:14px">
-      <button id="tabActive" onclick="switchTab('active')" style="font-size:11px;padding:4px 14px;border-radius:99px;border:1px solid #1A1917;background:#1A1917;color:#fff;cursor:pointer;font-family:inherit;font-weight:500">활성 17명</button>
-      <button id="tabCanceled" onclick="switchTab('canceled')" style="font-size:11px;padding:4px 14px;border-radius:99px;border:1px solid #D1CFC9;background:transparent;color:#6B6861;cursor:pointer;font-family:inherit">이탈 116건</button>
+      <button id="tabActive" onclick="switchTab('active')" style="font-size:11px;padding:4px 14px;border-radius:99px;border:1px solid #1A1917;background:#1A1917;color:#fff;cursor:pointer;font-family:inherit;font-weight:500">활성 13명</button>
+      <button id="tabCanceled" onclick="switchTab('canceled')" style="font-size:11px;padding:4px 14px;border-radius:99px;border:1px solid #D1CFC9;background:transparent;color:#6B6861;cursor:pointer;font-family:inherit">이탈 120건</button>
     </div>
     <div id="panelActive">
       <table class="sub-table">
@@ -607,9 +599,6 @@ new Chart(document.getElementById('mrrChart'),{
 const subs=[
   {name:'PARK DONG HYUN',email:'kkorea7107@gmail.com',amt:'$55.20',interval:'월간',start:'2026-06-04'},
   {name:'KIM SUNG JIN',email:'sj98525@naver.com',amt:'$9.00',interval:'월간',start:'2026-05-25'},
-  {name:'KIM SUNJU',email:'ksunju426@gmail.com',amt:'$55.20',interval:'월간',start:'2026-05-21'},
-  {name:'SUN JU KIM',email:'ksunju426@mediacan.co.kr',amt:'$9.00',interval:'월간',start:'2026-05-21'},
-  {name:'PARK DONG HYUN',email:'kkorea7107@gmail.net',amt:'$22.50',interval:'월간',start:'2026-05-15'},
   {name:'LIM JINMYUNG',email:'jinmyung.lim@gmail.com',amt:'$9.00',interval:'월간',start:'2026-05-07'},
   {name:'김민수',email:'ulmolum@gmail.com',amt:'$9.00',interval:'월간',start:'2026-03-30'},
   {name:'Diquest',email:'ploonet.production@gmail.com',amt:'$55.20',interval:'월간',start:'2026-03-10'},
@@ -620,7 +609,6 @@ const subs=[
   {name:'park sung su',email:'1997010801@hanmail.net',amt:'$9.00',interval:'월간',start:'2025-08-20'},
   {name:'김진수',email:'js72441388@gmail.com',amt:'$264.00',interval:'연간',start:'2025-07-17'},
   {name:'김영룡',email:'gpapapa93@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-20'},
-  {name:'LEE JAEJUN',email:'semirush@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-10'},
   {name:'kim su yeol',email:'ilovejump1127@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-09'},
 ];
 function maskEmail(email) {
@@ -645,7 +633,10 @@ subs.forEach(s=>{
 
 // 이탈 구독자
 const canceled = [
-  {name:'KANG YOUNG HYO',email:'yapigaming10@gmail.com',amt:'$264.00',interval:'연간',start:'2025-05-06',end:'2027-05-06'},
+  {name:'KIM SUNJU',email:'ksunju426@gmail.com',amt:'$55.20',interval:'월간',start:'2026-05-21',end:'2026-06-21'},
+  {name:'SUN JU KIM',email:'ksunju426@mediacan.co.kr',amt:'$9.00',interval:'월간',start:'2026-05-21',end:'2026-06-21'},
+  {name:'PARK DONG HYUN',email:'kkorea7107@gmail.net',amt:'$22.50',interval:'월간',start:'2026-05-15',end:'2026-06-15'},
+  {name:'LEE JAEJUN',email:'semirush@gmail.com',amt:'$264.00',interval:'연간',start:'2025-06-10',end:'2026-06-22'},
   {name:'KANG SEONGRAE',email:'seongrae.kang@diquest.com',amt:'$102.00',interval:'연간',start:'2025-10-22',end:'2026-10-22'},
   {name:'PARKJIYOUNG',email:'fight2.mumu@gmail.com',amt:'$55.20',interval:'월간',start:'2026-04-23',end:'2026-06-23'},
   {name:'이소연',email:'rptkd58477@naver.com',amt:'$264.00',interval:'연간',start:'2025-06-21',end:'2026-06-21'},
